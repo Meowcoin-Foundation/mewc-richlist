@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import labels from "@/data/labels.json";
-import { getBestHeight } from "@/lib/blockbook";
+import { getBestHeight, getBalancesBatch } from "@/lib/blockbook";
 import { getLastHeight, setLastHeight, getTopFile, setTopFile, mewcString } from "@/lib/store";
 import { discoverNewAddresses } from "@/lib/block-scanner";
 
@@ -117,31 +117,14 @@ export async function GET() {
     console.log('[REFRESH] - Newly discovered:', discoveredAddresses.length);
     console.log('[REFRESH] - Unique total:', allAddresses.length);
 
-    // Get the base URL for internal fetch
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                    "http://localhost:3000";
-
-    // Batch balances
+    // Fetch balances directly (no HTTP call to avoid deployment protection issues)
     console.log('[REFRESH] Fetching balances...');
-    const r = await fetch(`${baseUrl}/api/balances`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ addresses: allAddresses }),
-    });
-    
-    if (!r.ok) {
-      const errorText = await r.text();
-      console.error('[REFRESH] Balances fetch failed:', r.status, errorText);
-      throw new Error(`/api/balances failed ${r.status}: ${errorText}`);
-    }
-    
-    const j = await r.json();
-    console.log('[REFRESH] Received', j.results?.length, 'balance results');
+    const results = await getBalancesBatch(allAddresses, 8);
+    console.log('[REFRESH] Received', results?.length, 'balance results');
 
     const now = new Date().toISOString();
     const lab: LabelMap = (labels as any) ?? {};
-    const entries = (j.results as any[]).map(e => ({
+    const entries = results.map(e => ({
       address: e.address,
       balanceSat: e.balanceSat,
       balance: mewcString(e.balanceSat),
