@@ -1,26 +1,104 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root { 
+  --bg: #000000; 
+  --primary: #bb8400; 
+  --text: #e7e7e7; 
+  --muted: #9aa0a6; 
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html, body { 
+  background: var(--bg); 
+  color: var(--text); 
+  margin: 0; 
+  padding: 0; 
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; 
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+a { 
+  color: var(--primary); 
+  text-decoration: none; 
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+a:hover {
+  text-decoration: underline;
+}
+
+.container { 
+  max-width: 960px; 
+  margin: 0 auto; 
+  padding: 24px; 
+}
+
+.card { 
+  border: 1px solid #1f1f1f; 
+  background: #0c0c0c; 
+  border-radius: 12px; 
+  padding: 20px; 
+}
+
+.row { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 12px 16px; 
+  border-bottom: 1px solid #121212; 
+  transition: background 0.2s ease;
+}
+
+.row:hover {
+  background: #151515;
+}
+
+.row:last-child { 
+  border-bottom: none; 
+}
+
+.badge { 
+  background: rgba(187,132,0,0.15); 
+  color: var(--primary); 
+  border: 1px solid rgba(187,132,0,0.35); 
+  padding: 3px 10px; 
+  border-radius: 999px; 
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.small { 
+  color: var(--muted); 
+  font-size: 13px; 
+}
+
+.title { 
+  color: var(--text); 
+}
+
+/* Recharts tooltip styling */
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.recharts-default-tooltip {
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text) !important;
+  font-weight: 600;
+}
+
+.recharts-tooltip-item {
+  color: var(--primary) !important;
+}
+
+/* Legend styling */
+.recharts-legend-wrapper {
+  margin-top: 16px !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--text) !important;
+  font-size: 13px;
 }
