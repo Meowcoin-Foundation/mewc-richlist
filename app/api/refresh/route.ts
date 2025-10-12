@@ -43,12 +43,13 @@ export async function GET() {
       try {
         // Try to fetch the next block directly
         const blockbookBase = process.env.BLOCKBOOK_URL!;
-        const url = `${blockbookBase}/api/v2/block/${nextExpected}?_cb=${Date.now()}`;
+        const url = `${blockbookBase}/api/v2/block/${nextExpected}`;
         const r = await fetch(url, { 
           cache: "no-store",
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
+            'Pragma': 'no-cache',
+            'X-Cache-Bust': String(Date.now())
           }
         });
         

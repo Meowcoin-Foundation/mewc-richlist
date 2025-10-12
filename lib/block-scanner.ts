@@ -5,12 +5,13 @@ import { getAddressBalance } from "./blockbook";
  */
 export async function getBlockAddresses(height: number, blockbookBase = process.env.BLOCKBOOK_URL!): Promise<string[]> {
   console.log(`[SCANNER] Fetching block ${height}...`);
-  const url = `${blockbookBase}/api/v2/block/${height}?_cb=${Date.now()}`;
+  const url = `${blockbookBase}/api/v2/block/${height}`;
   const r = await fetch(url, { 
     cache: "no-store",
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
+      'Pragma': 'no-cache',
+      'X-Cache-Bust': String(Date.now())
     }
   });
   

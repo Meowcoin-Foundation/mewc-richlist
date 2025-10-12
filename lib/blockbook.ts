@@ -1,16 +1,14 @@
-// Cache buster to force fresh data from Cloudflare edge
-function cacheBust() {
-  return `_cb=${Date.now()}`;
-}
-
 export async function getBestHeight(blockbookBase = process.env.BLOCKBOOK_URL!) {
   console.log('[BLOCKBOOK] Fetching best height from', blockbookBase);
-  const url = `${blockbookBase}/api/?${cacheBust()}`;
+  // Don't use query params as they cause redirects on /api/ endpoint
+  // Use headers only to bypass cache
+  const url = `${blockbookBase}/api`;
   const r = await fetch(url, { 
     cache: "no-store",
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
+      'Pragma': 'no-cache',
+      'X-Cache-Bust': String(Date.now())
     }
   });
   
@@ -44,12 +42,13 @@ export async function getBestHeight(blockbookBase = process.env.BLOCKBOOK_URL!) 
  * Returns { balanceSat: number, balance: string }
  */
 export async function getAddressBalance(addr: string, blockbookBase = process.env.BLOCKBOOK_URL!) {
-  const url = `${blockbookBase}/api/v2/address/${addr}?details=basic&${cacheBust()}`;
+  const url = `${blockbookBase}/api/v2/address/${addr}?details=basic`;
   const r = await fetch(url, { 
     cache: "no-store",
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
+      'Pragma': 'no-cache',
+      'X-Cache-Bust': String(Date.now())
     }
   });
   
