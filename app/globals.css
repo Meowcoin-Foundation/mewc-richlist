@@ -102,3 +102,55 @@ a:hover {
   color: var(--text) !important;
   font-size: 13px;
 }
+
+/* Mobile responsive styling */
+@media (min-width: 640px) {
+  /* Desktop: hide mobile versions */
+  .address-mobile,
+  .balance-mobile,
+  .mobile-break {
+    display: none !important;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Mobile: hide full versions, show truncated */
+  .address-full,
+  .balance-full {
+    display: none !important;
+  }
+  
+  .address-mobile,
+  .balance-mobile {
+    display: inline !important;
+  }
+  
+  .container {
+    padding: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .row {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+  
+  /* Make chart smaller on mobile */
+  .recharts-wrapper {
+    font-size: 12px;
+  }
+  
+  /* Better footer spacing on mobile */
+  footer {
+    font-size: 11px !important;
+    line-height: 1.6;
+  }
+}

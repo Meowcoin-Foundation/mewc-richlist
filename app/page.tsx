@@ -13,6 +13,24 @@ function explorerUrl(address: string) {
   return (opt === "explorer" ? A : B) + address;
 }
 
+// Truncate address for mobile display
+function truncateAddress(address: string, isMobile: boolean = false) {
+  if (!isMobile || address.length <= 20) return address;
+  return `${address.slice(0, 8)}...${address.slice(-6)}`;
+}
+
+// Format balance for mobile (shorter notation)
+function formatBalance(balance: string, isMobile: boolean = false) {
+  if (!isMobile) return balance;
+  const num = parseFloat(balance.replace(/,/g, ''));
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(2)}M`;
+  } else if (num >= 1000) {
+    return `${(num / 1000).toFixed(2)}K`;
+  }
+  return num.toFixed(2);
+}
+
 export default function Home() {
   const { data } = useSWR("/api/top200", fetcher, { refreshInterval: 15000 });
   const entries = data?.entries ?? [];
@@ -63,18 +81,20 @@ export default function Home() {
 
   return (
     <div className="container">
-      <header style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 16 }}>
+      <header style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <Image
           src="/MeowcoinR2.png"
           alt="Meowcoin Logo"
           width={48}
           height={48}
-          style={{ borderRadius: "50%" }}
+          style={{ borderRadius: "50%", flexShrink: 0 }}
         />
-        <div>
-          <h1 className="title" style={{ fontSize: 32, margin: 0 }}>Meowcoin Rich List</h1>
-          <div className="small" style={{ marginTop: 6 }}>
-            Height: <span className="badge">{height}</span> · Updated: {updatedAt}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1 className="title" style={{ fontSize: "clamp(20px, 5vw, 32px)", margin: 0 }}>Meowcoin Rich List</h1>
+          <div className="small" style={{ marginTop: 6, fontSize: "clamp(11px, 2.5vw, 13px)", wordBreak: "break-word" }}>
+            Height: <span className="badge">{height}</span>
+            <br className="mobile-break" />
+            <span style={{ display: "inline-block", marginTop: 2 }}>Updated: {updatedAt}</span>
           </div>
         </div>
       </header>
@@ -87,7 +107,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div style={{ width: "100%", height: 300 }}>
+            <div style={{ width: "100%", height: "clamp(250px, 50vw, 300px)" }}>
               <ResponsiveContainer>
                 <PieChart>
                   <Pie data={chartData} dataKey="value" nameKey="name" outerRadius={100} innerRadius={55}>
@@ -138,7 +158,7 @@ export default function Home() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="small" style={{ marginTop: 12 }}>
+            <div className="small" style={{ marginTop: 12, fontSize: "clamp(11px, 2.5vw, 13px)", wordBreak: "break-word" }}>
               Total (Top {entries.length}): {(sum/1e8).toLocaleString(undefined, { maximumFractionDigits: 8 })} MEWC
             </div>
           </>
@@ -212,17 +232,30 @@ export default function Home() {
           ) : (
             entries.map((e: any, i: number) => (
               <div key={e.address} className="row">
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <div className="badge">#{i+1}</div>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <a href={explorerUrl(e.address)} target="_blank" rel="noreferrer" className="title" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 14 }}>
-                      {e.address}
+                <div style={{ display: "flex", gap: 10, alignItems: "center", minWidth: 0, flex: 1 }}>
+                  <div className="badge" style={{ flexShrink: 0 }}>#{i+1}</div>
+                  <div style={{ display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+                    <a 
+                      href={explorerUrl(e.address)} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="title address-link" 
+                      style={{ 
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", 
+                        fontSize: "clamp(12px, 3vw, 14px)",
+                        wordBreak: "break-all"
+                      }}
+                      title={e.address}
+                    >
+                      <span className="address-full">{e.address}</span>
+                      <span className="address-mobile">{truncateAddress(e.address, true)}</span>
                     </a>
-                    {e.label && <span className="small">{e.label}</span>}
+                    {e.label && <span className="small" style={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}>{e.label}</span>}
                   </div>
                 </div>
-                <div className="title" style={{ fontWeight: 700 }}>
-                  {e.balance} <span className="small">MEWC</span>
+                <div className="title balance-amount" style={{ fontWeight: 700, flexShrink: 0, textAlign: "right", fontSize: "clamp(12px, 3vw, 16px)" }}>
+                  <span className="balance-full">{e.balance} <span className="small">MEWC</span></span>
+                  <span className="balance-mobile">{formatBalance(e.balance, true)} <span className="small">MEWC</span></span>
                 </div>
               </div>
             ))
@@ -230,8 +263,10 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="small" style={{ marginTop: 16, textAlign: "center" }}>
-        Theme: <span className="badge">#000000</span> · Primary: <span className="badge">#bb8400</span> · Data auto-refreshes every ~15s.
+      <footer className="small" style={{ marginTop: 16, textAlign: "center", fontSize: "clamp(10px, 2.5vw, 13px)" }}>
+        Theme: <span className="badge">#000000</span> · Primary: <span className="badge">#bb8400</span>
+        <br className="mobile-break" />
+        <span style={{ display: "inline-block", marginTop: 4 }}>Data auto-refreshes every ~15s.</span>
       </footer>
     </div>
   );
