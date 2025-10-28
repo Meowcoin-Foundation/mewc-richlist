@@ -107,14 +107,12 @@ export async function GET() {
     console.log(`[REFRESH] Block gap: ${blockGap}, Catch-up mode: ${isCatchUpMode}`);
 
     let discoveredAddresses: string[] = [];
-    let addressesToCheck: string[] = [];
 
     if (isCatchUpMode) {
-      // CATCH-UP MODE: Skip block scanning, just increment height with existing addresses
-      console.log('[REFRESH] 🚀 CATCH-UP MODE: Skipping block scan, using top 100 addresses only');
-      addressesToCheck = previousAddresses.slice(0, 100); // Only check top 100 to save time
+      // CATCH-UP MODE: Skip expensive block scanning to save time
+      console.log('[REFRESH] 🚀 CATCH-UP MODE: Skipping block scanning to catch up quickly');
     } else {
-      // NORMAL MODE: Scan blocks and check more addresses
+      // NORMAL MODE: Scan recent blocks for new addresses
       console.log('[REFRESH] 🔍 NORMAL MODE: Scanning recent blocks for addresses...');
       try {
         // Check timeout before expensive operation
@@ -127,29 +125,29 @@ export async function GET() {
       } catch (e: any) {
         console.error('[REFRESH] Block scanning failed:', e?.message);
       }
-
-      // Smart address selection: Top 150 from previous + all new discoveries
-      const priorityAddresses = previousAddresses.slice(0, 150); // Top 150 only
-      addressesToCheck = Array.from(new Set([
-        ...priorityAddresses,
-        ...discoveredAddresses
-      ]));
     }
+
+    // ALWAYS check all existing addresses + any new discoveries
+    // This maintains the 200-address rich list with natural competition
+    const addressesToCheck = Array.from(new Set([
+      ...previousAddresses,     // All existing addresses (usually 200)
+      ...discoveredAddresses    // Plus any newly discovered addresses
+    ]));
     
     console.log('[REFRESH] Addresses to check:', addressesToCheck.length);
-    console.log('[REFRESH] - Priority previous:', Math.min(previousAddresses.length, isCatchUpMode ? 100 : 150));
+    console.log('[REFRESH] - Previously tracked:', previousAddresses.length);
     console.log('[REFRESH] - Newly discovered:', discoveredAddresses.length);
     console.log('[REFRESH] - Total unique:', addressesToCheck.length);
 
     // Check timeout before balance fetching
     if (Date.now() - startTime > MAX_PROCESSING_TIME - 90000) { // 1.5 min buffer
-      console.log('[REFRESH] ⏰ Approaching timeout, using minimal address set');
-      addressesToCheck = addressesToCheck.slice(0, 50); // Emergency fallback
+      console.log('[REFRESH] ⏰ Approaching timeout, proceeding with current address set');
+      // Don't reduce addresses - just log the warning and continue
     }
 
-    // Fetch balances with higher concurrency
+    // Fetch balances with higher concurrency for speed
     console.log('[REFRESH] Fetching balances...');
-    const results = await getBalancesBatch(addressesToCheck, 16); // Increased from 8 to 16
+    const results = await getBalancesBatch(addressesToCheck, 20); // Increased from 16 to 20
     console.log('[REFRESH] Received', results?.length, 'balance results');
 
     const now = new Date().toISOString();
